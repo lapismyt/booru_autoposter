@@ -43,10 +43,12 @@ async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
         if r.is_banned or r.is_deleted or r.is_pending:
             srch.remove(r)
     if not srch:
+        logger.info('Empty search')
         await adapter.close()
         return None
     result: DanbooruPost = random.choice(srch)
     if not result.media_asset.variants:
+        logger.info('Empty media asset variants')
         await adapter.close()
         return None
     await adapter.close()
@@ -71,11 +73,13 @@ async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple
         return None
     if not posts:
         await adapter.close()
+        logger.info('Empty search')
         return None
     # if isinstance(posts, GelbooruSearchResponse):
     #     posts = posts.post
     result: GelbooruPost = random.choice(posts)
     if not result.image:
+        logger.info('Now image')
         await adapter.close()
         return None
     await adapter.close()
