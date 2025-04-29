@@ -10,7 +10,6 @@ class GelbooruPost:
     score: int
     width: int
     height: int
-    md5: str
     directory: str
     image: str
     rating: str
@@ -34,6 +33,7 @@ class GelbooruPost:
     status: str
     post_locked: int
     has_children: bool
+    md5: str | None = None
     created_at: str | None = None
 
 
