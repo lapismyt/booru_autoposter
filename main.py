@@ -84,7 +84,7 @@ async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple
         return None
     await adapter.close()
     logger.info(f'Image found, ID {result.id}.')
-    if result.sample_url:
+    if result.sample_url and 'gif' not in result.file_url and 'mp4' not in result.file_url:
         url = result.sample_url
         logger.info('Using sample image.')
     else:

@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3d45c6d1-4e8a-42d7-bf41-5102e44310dc" name="Changes" comment="Additional logging">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/booru.py" beforeDir="false" afterPath="$PROJECT_DIR$/booru.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-    </list>
+    <list default="true" id="3d45c6d1-4e8a-42d7-bf41-5102e44310dc" name="Changes" comment="Removed temporary extra logging, prevent using &gt;2 tags for /dan" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -170,7 +166,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745920535443</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="Removed temporary extra logging, prevent using &gt;2 tags for /dan">
+      <option name="closed" value="true" />
+      <created>1745920887454</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1745920887454</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -183,6 +187,7 @@
     <MESSAGE value="Fix bug, temp more logging" />
     <MESSAGE value="Fix GelbooruPost fields for Safebooru support" />
     <MESSAGE value="Additional logging" />
-    <option name="LAST_COMMIT_MESSAGE" value="Additional logging" />
+    <MESSAGE value="Removed temporary extra logging, prevent using &gt;2 tags for /dan" />
+    <option name="LAST_COMMIT_MESSAGE" value="Removed temporary extra logging, prevent using &gt;2 tags for /dan" />
   </component>
 </project>
