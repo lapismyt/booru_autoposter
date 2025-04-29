@@ -153,6 +153,9 @@ async def dan_handler(message: Message):
     if len(message.text) < 7:
         await message.answer('WRONG USE')
         return None
+    elif len(message.text.split()) > 3:
+        await message.answer('/dan allows no more than 2 tags')
+        return None
     await post_one_image(message.text.removeprefix('/dan '), message.chat.id, 'dan')
     return None
 

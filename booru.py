@@ -76,7 +76,7 @@ class GelbooruAdapter(BooruAdapter):
             # print(await resp.json())
             conv: list | dict = await resp.json()
             if isinstance(conv, list):
-                print(conv)
+                # print(conv)
                 return [GelbooruPost.from_dict(post) for post in conv]
             return GelbooruSearchResponse.from_dict(await resp.json()).post
 
