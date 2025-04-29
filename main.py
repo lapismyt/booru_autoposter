@@ -31,7 +31,7 @@ dp = Dispatcher()
 
 
 async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
-    logger.info('Searching image...')
+    logger.info(f'Searching image using DanbooruAdapter...')
     adapter = DanbooruAdapter(proxy=(PROXY if PROXY else None))
     try:
         srch = await adapter.search(tags, limit=100, random=True)
@@ -61,7 +61,7 @@ async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
     return last
 
 async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple[str, str] | None:
-    logger.info('Searching image...')
+    logger.info(f'Searching image using {use_adapter}...')
     adapter = use_adapter(proxy=(PROXY if PROXY else None))
     try:
         srch = (await adapter.search(tags, limit=100)).post
