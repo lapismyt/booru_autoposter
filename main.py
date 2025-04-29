@@ -6,7 +6,7 @@ from aiogram.types import URLInputFile, Message
 from dotenv import load_dotenv
 from loguru import logger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from booru import DanbooruAdapter, DanbooruError, GelbooruAdapter
+from booru import DanbooruAdapter, DanbooruError, GelbooruAdapter, SafebooruAdapter
 from models import DanbooruPost, GelbooruPost
 
 load_dotenv()
@@ -56,9 +56,9 @@ async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
     logger.info('Sample not found (somehow), using image from last iteration.')
     return last
 
-async def fetch_one_image_gel(tags: str) -> tuple[str, str] | None:
+async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple[str, str] | None:
     logger.info('Searching image...')
-    adapter = GelbooruAdapter(proxy=(PROXY if PROXY else None))
+    adapter = use_adapter(proxy=(PROXY if PROXY else None))
     try:
         srch = (await adapter.search(tags, limit=100)).post
     except BaseException as err:
@@ -82,12 +82,12 @@ async def fetch_one_image_gel(tags: str) -> tuple[str, str] | None:
         logger.info('Using original image.')
     return url, os.path.splitext(url)[1].lstrip('.')
 
-async def post_one_image(tags: str, channel: int, booru_type = 'gel'):
+async def post_one_image(tags: str, channel: int, booru_type = 'gel', gel_adapter = GelbooruAdapter):
     logger.info('Posting image...')
     if booru_type == 'dan':
         img = await fetch_one_image_dan(tags)
     elif booru_type == 'gel':
-        img = await fetch_one_image_gel(tags)
+        img = await fetch_one_image_gel(tags, gel_adapter)
     else: return None
     if not img:
         await bot.send_message(
@@ -146,7 +146,7 @@ async def main():
     me = await bot.get_me()
     logger.info(f'Starting @{me.username}')
     await post_one_image(SEARCH_TAGS, CHANNEL_ID)
-    scheduler.add_job(post_one_image, trigger='interval', seconds=INTERVAL, args=(SEARCH_TAGS, CHANNEL_ID))
+    scheduler.add_job(post_one_image, trigger='interval', seconds=INTERVAL, args=(SEARCH_TAGS, CHANNEL_ID, SafebooruAdapter))
     scheduler.start()
     await dp.start_polling(bot)
 

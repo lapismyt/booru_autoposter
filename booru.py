@@ -77,6 +77,10 @@ class GelbooruAdapter(BooruAdapter):
             return GelbooruSearchResponse.from_dict(await resp.json())
 
 
+class SafebooruAdapter(GelbooruAdapter):
+    api_base = 'https://safebooru.org/'
+
+
 class DanbooruError(Exception):
     pass
 
@@ -129,7 +133,8 @@ class DanbooruAdapter(BooruAdapter):
 
 adapters = [
     GelbooruAdapter,
-    DanbooruAdapter
+    DanbooruAdapter,
+    SafebooruAdapter
 ]
 
 
