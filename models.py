@@ -7,7 +7,6 @@ from dataclasses_json import dataclass_json, config, DataClassJsonMixin
 @dataclass
 class GelbooruPost:
     id: int
-    score: int
     width: int
     height: int
     directory: str
@@ -17,23 +16,26 @@ class GelbooruPost:
     change: int
     owner: str
     parent_id: int
-    sample: int
-    preview_height: int
-    preview_width: int
     tags: str
-    title: str
     has_notes: bool
-    has_comments: bool
     file_url: str
     preview_url: str
     sample_url: str
     sample_height: int
     sample_width: int
     status: str
-    post_locked: int
-    has_children: bool
+    score: int | None = None
+    sample: int | bool | None = None
+    preview_height: int | None = None
+    preview_width: int | None = None
+    title: str | None = None
+    has_comments: bool | None = None
+    comment_count: int | None = None
+    post_locked: int | None = None
+    has_children: bool | None = None
     creator_id: int | None = None
     md5: str | None = None
+    hash: str | None = None
     created_at: str | None = None
 
 
