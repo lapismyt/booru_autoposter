@@ -1,4 +1,6 @@
 import random
+from urllib.parse import urlparse
+
 from aiogram import Bot, Dispatcher, F
 import asyncio
 import os
@@ -106,9 +108,10 @@ async def post_one_image(tags: str, channel: int, booru_type = 'gel', gel_adapte
                 parse_mode='HTML'
             )
         case 'gif':
+            filename = os.path.split(urlparse(img_url).path)[1]
             await bot.send_animation(
                 chat_id=channel,
-                animation=URLInputFile(img_url),
+                animation=URLInputFile(img_url, filename=filename),
                 caption=CAPTION,
                 parse_mode='HTML'
             )
