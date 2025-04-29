@@ -81,6 +81,10 @@ class SafebooruAdapter(GelbooruAdapter):
     api_base = 'https://safebooru.org/'
 
 
+class Rule34Adapter(GelbooruAdapter):
+    api_base = 'https://rule34.xxx/'
+
+
 class DanbooruError(Exception):
     pass
 

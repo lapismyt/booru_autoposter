@@ -4,11 +4,13 @@ from urllib.parse import urlparse
 from aiogram import Bot, Dispatcher, F
 import asyncio
 import os
+
+from aiogram.filters import Command
 from aiogram.types import URLInputFile, Message
 from dotenv import load_dotenv
 from loguru import logger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from booru import DanbooruAdapter, DanbooruError, GelbooruAdapter, SafebooruAdapter
+from booru import DanbooruAdapter, DanbooruError, GelbooruAdapter, SafebooruAdapter, Rule34Adapter
 from models import DanbooruPost, GelbooruPost
 
 load_dotenv()
@@ -132,15 +134,40 @@ async def post_one_image(tags: str, channel: int, booru_type = 'gel', gel_adapte
     return None
 
 
+@dp.message(Command('gel'))
+async def safe_handler(message: Message):
+    if len(message.text) < 7:
+        await message.answer('WRONG USE')
+        return None
+    await post_one_image(message.text.removeprefix('/gel '), message.chat.id, 'gel')
+    return None
+
+@dp.message(Command('dan'))
+async def dan_handler(message: Message):
+    if len(message.text) < 7:
+        await message.answer('WRONG USE')
+        return None
+    await post_one_image(message.text.removeprefix('/dan '), message.chat.id, 'dan')
+    return None
+
+@dp.message(Command('r34'))
+async def r34_handler(message: Message):
+    if len(message.text) < 7:
+        await message.answer('WRONG USE')
+        return None
+    await post_one_image(message.text.removeprefix('/r34 '), message.chat.id, 'gel', Rule34Adapter)
+    return None
+
+
 @dp.message(F.text)
 async def text_handler(message: Message):
     me = await bot.get_me()
     if message.text.startswith('/'):
         return None
     if message.chat.type == 'private':
-        await post_one_image(message.text, message.chat.id)
+        await post_one_image(message.text, message.chat.id, 'gel', SafebooruAdapter)
     elif message.text.startswith(f'@{me.username} '):
-        await post_one_image(message.text.removeprefix(f'@{me.username} '), message.chat.id)
+        await post_one_image(message.text.removeprefix(f'@{me.username} '), message.chat.id, 'gel', SafebooruAdapter)
     return None
 
 
@@ -149,7 +176,7 @@ async def main():
     me = await bot.get_me()
     logger.info(f'Starting @{me.username}')
     await post_one_image(SEARCH_TAGS, CHANNEL_ID)
-    scheduler.add_job(post_one_image, trigger='interval', seconds=INTERVAL, args=(SEARCH_TAGS, CHANNEL_ID, SafebooruAdapter))
+    scheduler.add_job(post_one_image, trigger='interval', seconds=INTERVAL, args=(SEARCH_TAGS, CHANNEL_ID, 'gel', SafebooruAdapter))
     scheduler.start()
     await dp.start_polling(bot)
 
