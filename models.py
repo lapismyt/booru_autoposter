@@ -7,7 +7,6 @@ from dataclasses_json import dataclass_json, config, DataClassJsonMixin
 @dataclass
 class GelbooruPost:
     id: int
-    created_at: str
     score: int
     width: int
     height: int
@@ -35,6 +34,7 @@ class GelbooruPost:
     status: str
     post_locked: int
     has_children: bool
+    created_at: str | None = None
 
 
 @dataclass_json
