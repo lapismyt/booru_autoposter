@@ -175,7 +175,7 @@ async def main():
     scheduler = AsyncIOScheduler()
     me = await bot.get_me()
     logger.info(f'Starting @{me.username}')
-    await post_one_image(SEARCH_TAGS, CHANNEL_ID)
+    await post_one_image(SEARCH_TAGS, CHANNEL_ID, 'gel', SafebooruAdapter)
     scheduler.add_job(post_one_image, trigger='interval', seconds=INTERVAL, args=(SEARCH_TAGS, CHANNEL_ID, 'gel', SafebooruAdapter))
     scheduler.start()
     await dp.start_polling(bot)
