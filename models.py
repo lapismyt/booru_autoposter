@@ -16,7 +16,6 @@ class GelbooruPost:
     source: str
     change: int
     owner: str
-    creator_id: int
     parent_id: int
     sample: int
     preview_height: int
@@ -33,6 +32,7 @@ class GelbooruPost:
     status: str
     post_locked: int
     has_children: bool
+    creator_id: int | None = None
     md5: str | None = None
     created_at: str | None = None
 
