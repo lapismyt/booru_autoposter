@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3d45c6d1-4e8a-42d7-bf41-5102e44310dc" name="Changes" comment="More logging">
+    <list default="true" id="3d45c6d1-4e8a-42d7-bf41-5102e44310dc" name="Changes" comment="Fix bug">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/booru.py" beforeDir="false" afterPath="$PROJECT_DIR$/booru.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -112,7 +114,15 @@
       <option name="project" value="LOCAL" />
       <updated>1745919375909</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Fix bug">
+      <option name="closed" value="true" />
+      <created>1745919477125</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1745919477125</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
@@ -121,6 +131,7 @@
     <MESSAGE value="Maybe fixed GIF filenames?" />
     <MESSAGE value="Add direct queries to multiple img-boards, fix bug, add rule34.xxx" />
     <MESSAGE value="More logging" />
-    <option name="LAST_COMMIT_MESSAGE" value="More logging" />
+    <MESSAGE value="Fix bug" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix bug" />
   </component>
 </project>

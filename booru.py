@@ -5,7 +5,7 @@ import aiohttp
 from rich import print
 from yarl import URL
 
-from models import GelbooruSearchResponse, DanbooruPost
+from models import GelbooruSearchResponse, DanbooruPost, GelbooruPost
 
 
 class BooruAdapter(ABC):
@@ -54,7 +54,7 @@ class GelbooruAdapter(BooruAdapter):
             limit: int = 100,
             page: int = 0,
             deleted: bool = False
-    ) -> GelbooruSearchResponse:
+    ) -> list[GelbooruPost]:
 
         params = {
             'tags': query,
@@ -74,7 +74,11 @@ class GelbooruAdapter(BooruAdapter):
                 params=params
             ) as resp:
             # print(await resp.json())
-            return GelbooruSearchResponse.from_dict(await resp.json())
+            conv: list | dict = await resp.json()
+            if isinstance(conv, list):
+                # print(conv)
+                return [GelbooruPost.from_dict(post) for post in conv]
+            return GelbooruSearchResponse.from_dict(await resp.json()).post
 
 
 class SafebooruAdapter(GelbooruAdapter):
@@ -129,7 +133,7 @@ class DanbooruAdapter(BooruAdapter):
             ) as resp:
             conv: list | dict = await resp.json()
             if isinstance(conv, list):
-                print(conv)
+                # print(conv)
                 return [DanbooruPost.from_dict(post) for post in conv]
             raise DanbooruError(conv['message'])
 

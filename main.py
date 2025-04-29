@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from loguru import logger
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from booru import DanbooruAdapter, DanbooruError, GelbooruAdapter, SafebooruAdapter, Rule34Adapter
-from models import DanbooruPost, GelbooruPost
+from models import DanbooruPost, GelbooruPost, GelbooruSearchResponse
 
 load_dotenv()
 
@@ -64,15 +64,17 @@ async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple
     logger.info(f'Searching image using {use_adapter}...')
     adapter = use_adapter(proxy=(PROXY if PROXY else None))
     try:
-        srch = (await adapter.search(tags, limit=100)).post
+        posts = await adapter.search(tags, limit=100)
     except BaseException as err:
         logger.error(repr(err))
         await adapter.close()
         return None
-    if not srch:
+    if not posts:
         await adapter.close()
         return None
-    result: GelbooruPost = random.choice(srch)
+    # if isinstance(posts, GelbooruSearchResponse):
+    #     posts = posts.post
+    result: GelbooruPost = random.choice(posts)
     if not result.image:
         await adapter.close()
         return None
