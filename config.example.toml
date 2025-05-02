@@ -1,0 +1,21 @@
+BOT_TOKEN = ""
+OWNER_ID = ""
+DANBOORU_LOGIN = ""
+DANBOORU_API_KEY = ""
+
+[autopost.minecraft]
+adapter = "safebooru"
+chat_id = "-1002352614247"
+interval = 7200
+search_tags = "score:7_up minecraft"
+caption = "autopost / minecraft"
+allow_video = true
+
+[autopost.catgirl]
+adapter = "safebooru"
+chat_id = "-1002352614247"
+interval = 7200
+search_tags = "score:7_up catgirl"
+caption = "autopost / catgirl"
+allow_video = true
+

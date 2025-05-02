@@ -1,6 +1,7 @@
 aiogram~=3.19.0
 loguru
 python-dotenv
+toml
 aiohttp
 aiosqlite
 dataclasses-json
