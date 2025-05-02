@@ -137,6 +137,13 @@ async def post_one_image(tags: str, channel: int, booru_type = 'gel', gel_adapte
     return None
 
 
+@dp.message(Command('start'))
+async def start_handler(message: Message):
+    await message.answer('Hi! I can autopost images from imageboards to your channel. '
+                         'Just write @LapisMYT to setup bot. It\'s free, only condition is to '
+                         'place link to the bot in channel description.')
+
+
 @dp.message(Command('gel'))
 async def safe_handler(message: Message):
     if len(message.text) < 7:
@@ -145,6 +152,7 @@ async def safe_handler(message: Message):
     await post_one_image(message.text.removeprefix('/gel '), message.chat.id, 'gel', caption='')
     return None
 
+
 @dp.message(Command('sfb'))
 async def safe_handler(message: Message):
     if len(message.text) < 7:
@@ -152,6 +160,7 @@ async def safe_handler(message: Message):
         return None
     await post_one_image(message.text.removeprefix('/sfb '), message.chat.id, 'gel', SafebooruAdapter, caption='')
     return None
+
 
 @dp.message(Command('dan'))
 async def dan_handler(message: Message):
@@ -163,6 +172,7 @@ async def dan_handler(message: Message):
         return None
     await post_one_image(message.text.removeprefix('/dan '), message.chat.id, 'dan', caption='')
     return None
+
 
 @dp.message(Command('r34'))
 async def r34_handler(message: Message):
