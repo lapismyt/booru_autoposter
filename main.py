@@ -148,6 +148,13 @@ async def start_handler(message: Message):
                          'place link to the bot in channel description.')
 
 
+@dp.message(Command('start'))
+async def start_handler(message: Message):
+    await message.answer('Bot supports different imgboards: /sfb, /r34, /gel, /dan.\n'
+                         'You can use /[imgboard] [search query] to search.\n'
+                         'Use Gelbooru-style tags.')
+
+
 @dp.message(Command('gel'))
 async def gel_handler(message: Message):
     if len(message.text) < 7:
