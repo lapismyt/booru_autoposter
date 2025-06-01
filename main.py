@@ -27,7 +27,7 @@ dp = Dispatcher()
 
 
 async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
-    logger.info(f'Searching image using DanbooruAdapter...')
+    logger.info('Searching image using DanbooruAdapter...')
 
     adapter = DanbooruAdapter(proxy=(PROXY if PROXY else None), api_key=DANBOORU_API_KEY, username=DANBOORU_LOGIN)
     try:
@@ -55,11 +55,11 @@ async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
         last = var.url, var.file_ext
         if var.type == 'sample':
             logger.info('Returning original image URL.')
-            return var.url, var.file_ext
+            return var.url, var.file_ext, result.source or None, result.tag_string, result.score, result.rating
     logger.info('Sample not found (somehow), using image from last iteration.')
-    return last
+    return last, result.source or None, result.tag_string, result.score, result.rating
 
-async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple[str, str] | None:
+async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple[str, str, str] | None:
     logger.info(f'Searching image using {use_adapter}...')
     adapter = use_adapter(proxy=(PROXY if PROXY else None))
     try:
@@ -81,13 +81,13 @@ async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple
         return None
     await adapter.close()
     logger.info(f'Image found, ID {result.id}.')
-    if result.sample_url and 'gif' not in result.file_url and 'mp4' not in result.file_url:
+    if (result.sample_url and 'gif' not in result.file_url and 'mp4' not in result.file_url) and (result.height > 2048 or result.width > 2048):
         url = result.sample_url
         logger.info('Using sample image.')
     else:
         url = result.file_url
         logger.info('Using original image.')
-    return url, os.path.splitext(url)[1].lstrip('.')
+    return url, os.path.splitext(url)[1].lstrip('.'), result.source or None, result.tags, result.score, result.rating
 
 async def post_one_image(tags: str, channel: int, booru_type = 'gel', gel_adapter = GelbooruAdapter, caption = 'autopost', allow_video = True):
     logger.info('Posting image...')
@@ -95,7 +95,8 @@ async def post_one_image(tags: str, channel: int, booru_type = 'gel', gel_adapte
         img = await fetch_one_image_dan(tags)
     elif booru_type == 'gel':
         img = await fetch_one_image_gel(tags, gel_adapter)
-    else: return None
+    else:
+        return None
     if not img:
         await bot.send_message(
             chat_id=channel,
@@ -103,7 +104,10 @@ async def post_one_image(tags: str, channel: int, booru_type = 'gel', gel_adapte
         )
         return None
     else:
-        img_url, file_ext = img
+        img_url, file_ext, source, tags, score, rating = img
+    if source is None:
+        source = '❌'
+    caption = caption.format(tags=tags, source=source, score=score, rating=rating)
     match file_ext:
         case 'png' | 'jpg' | 'jpeg':
             await bot.send_photo(
@@ -145,7 +149,7 @@ async def start_handler(message: Message):
 
 
 @dp.message(Command('gel'))
-async def safe_handler(message: Message):
+async def gel_handler(message: Message):
     if len(message.text) < 7:
         await message.answer('WRONG USE')
         return None
@@ -154,7 +158,7 @@ async def safe_handler(message: Message):
 
 
 @dp.message(Command('sfb'))
-async def safe_handler(message: Message):
+async def sfb_handler(message: Message):
     if len(message.text) < 7:
         await message.answer('WRONG USE')
         return None
