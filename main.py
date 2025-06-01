@@ -137,7 +137,7 @@ async def post_one_image(tags: str, channel: int, booru_type = 'gel', gel_adapte
                 await post_one_image(tags, channel, booru_type, gel_adapter, caption, allow_video)
         case _:
             logger.info(f'Unknown file type: {file_ext}')
-    logger.info('Posted image.')
+    logger.info(f'Posted image.\n\nTags:\n{tags}\n\nScore:\n{score}')
     return None
 
 
@@ -148,8 +148,8 @@ async def start_handler(message: Message):
                          'place link to the bot in channel description.')
 
 
-@dp.message(Command('start'))
-async def start_handler(message: Message):
+@dp.message(Command('help'))
+async def help_handler(message: Message):
     await message.answer('Bot supports different imgboards: /sfb, /r34, /gel, /dan.\n'
                          'You can use /[imgboard] [search query] to search.\n'
                          'Use Gelbooru-style tags.')
