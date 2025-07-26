@@ -10,26 +10,36 @@ from aiogram.types import URLInputFile, Message
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from loguru import logger
 
-from booru import DanbooruAdapter, DanbooruError, GelbooruAdapter, SafebooruAdapter, Rule34Adapter
+from booru import (
+    DanbooruAdapter,
+    DanbooruError,
+    GelbooruAdapter,
+    SafebooruAdapter,
+    Rule34Adapter,
+)
 from models import DanbooruPost, GelbooruPost
 
-with open('config.toml', 'r') as f:
+with open("config.toml", "r") as f:
     config = toml.load(f)
 
-BOT_TOKEN = config['BOT_TOKEN']
-OWNER_ID = config['OWNER_ID']
-DANBOORU_LOGIN = config.get('DANBOORU_LOGIN')
-DANBOORU_API_KEY = config.get('DANBOORU_API_KEY')
-PROXY = config.get('HTTP_PROXY')
+BOT_TOKEN = config["BOT_TOKEN"]
+OWNER_ID = config["OWNER_ID"]
+DANBOORU_LOGIN = config.get("DANBOORU_LOGIN")
+DANBOORU_API_KEY = config.get("DANBOORU_API_KEY")
+PROXY = config.get("HTTP_PROXY")
 
 bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
 
 
 async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
-    logger.info('Searching image using DanbooruAdapter...')
+    logger.info("Searching image using DanbooruAdapter...")
 
-    adapter = DanbooruAdapter(proxy=(PROXY if PROXY else None), api_key=DANBOORU_API_KEY, username=DANBOORU_LOGIN)
+    adapter = DanbooruAdapter(
+        proxy=(PROXY if PROXY else None),
+        api_key=DANBOORU_API_KEY,
+        username=DANBOORU_LOGIN,
+    )
     try:
         srch = await adapter.search(tags, limit=100, random=True)
     except DanbooruError as err:
@@ -40,28 +50,46 @@ async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
         if r.is_banned or r.is_deleted or r.is_pending:
             srch.remove(r)
     if not srch:
-        logger.info('Empty search')
+        logger.info("Empty search")
         await adapter.close()
         return None
     result: DanbooruPost = random.choice(srch)
     if not result.media_asset.variants:
-        logger.info('Empty media asset variants')
+        logger.info("Empty media asset variants")
         await adapter.close()
         return None
     await adapter.close()
-    last = ''
-    logger.info(f'Image found, ID {result.id}.')
+    last = ""
+    logger.info(f"Image found, ID {result.id}.")
     for var in result.media_asset.variants:
         last = var.url, var.file_ext
-        if var.type == 'sample':
-            logger.info('Returning original image URL.')
-            return var.url, var.file_ext, result.source or None, result.tag_string, result.score, result.rating
-    logger.info('Sample not found (somehow), using image from last iteration.')
+        if var.type == "sample":
+            logger.info("Returning original image URL.")
+            return (
+                var.url,
+                var.file_ext,
+                result.source or None,
+                result.tag_string,
+                result.score,
+                result.rating,
+            )
+    logger.info("Sample not found (somehow), using image from last iteration.")
     return last, result.source or None, result.tag_string, result.score, result.rating
 
-async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple[str, str, str] | None:
-    logger.info(f'Searching image using {use_adapter}...')
-    adapter = use_adapter(proxy=(PROXY if PROXY else None), api_key=config.get(f'{use_adapter.__name__.upper().removesuffix("ADAPTER")}_API_KEY'))
+
+async def fetch_one_image_gel(
+    tags: str, use_adapter=GelbooruAdapter
+) -> tuple[str, str, str] | None:
+    logger.info(f"Searching image using {use_adapter}...")
+    adapter = use_adapter(
+        proxy=(PROXY if PROXY else None),
+        api_key=config.get(
+            f"{use_adapter.__name__.upper().removesuffix('ADAPTER')}_API_KEY"
+        ),
+        user_id=config.get(
+            f"{use_adapter.__name__.upper().removesuffix('ADAPTER')}_USER_ID"
+        ),
+    )
     try:
         posts = await adapter.search(tags, limit=100)
     except BaseException as err:
@@ -70,193 +98,244 @@ async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple
         return None
     if not posts:
         await adapter.close()
-        logger.info('Empty search')
+        logger.info("Empty search")
         return None
     # if isinstance(posts, GelbooruSearchResponse):
     #     posts = posts.post
     result: GelbooruPost = random.choice(posts)
     if not result.image:
-        logger.info('Now image')
+        logger.info("Now image")
         await adapter.close()
         return None
     await adapter.close()
-    logger.info(f'Image found, ID {result.id}.')
-    if (result.sample_url and 'gif' not in result.file_url and 'mp4' not in result.file_url) and (result.height > 2048 or result.width > 2048):
+    logger.info(f"Image found, ID {result.id}.")
+    if (
+        result.sample_url
+        and "gif" not in result.file_url
+        and "mp4" not in result.file_url
+    ) and (result.height > 2048 or result.width > 2048):
         url = result.sample_url
-        logger.info('Using sample image.')
+        logger.info("Using sample image.")
     else:
         url = result.file_url
-        logger.info('Using original image.')
-    return url, os.path.splitext(url)[1].lstrip('.'), result.source or None, result.tags, result.score, result.rating
+        logger.info("Using original image.")
+    return (
+        url,
+        os.path.splitext(url)[1].lstrip("."),
+        result.source or None,
+        result.tags,
+        result.score,
+        result.rating,
+    )
 
-async def post_one_image(tags: str, channel: int, booru_type = 'gel', gel_adapter = GelbooruAdapter, caption = 'autopost', allow_video = True):
-    logger.info('Posting image...')
-    if booru_type == 'dan':
+
+async def post_one_image(
+    tags: str,
+    channel: int,
+    booru_type="gel",
+    gel_adapter=GelbooruAdapter,
+    caption="autopost",
+    allow_video=True,
+):
+    logger.info("Posting image...")
+    if booru_type == "dan":
         img = await fetch_one_image_dan(tags)
-    elif booru_type == 'gel':
+    elif booru_type == "gel":
         img = await fetch_one_image_gel(tags, gel_adapter)
     else:
         return None
     if not img:
         await bot.send_message(
             chat_id=channel,
-            text='NOT FOUND',
+            text="NOT FOUND",
         )
         return None
     else:
         img_url, file_ext, source, tags, score, rating = img
     if source is None:
-        source = '❌'
+        source = "❌"
     caption = caption.format(tags=tags, source=source, score=score, rating=rating)
     match file_ext:
-        case 'png' | 'jpg' | 'jpeg':
+        case "png" | "jpg" | "jpeg":
             await bot.send_photo(
                 chat_id=channel,
                 photo=URLInputFile(img_url),
                 caption=caption,
-                parse_mode='HTML'
+                parse_mode="HTML",
             )
-        case 'gif':
+        case "gif":
             filename = os.path.split(urlparse(img_url).path)[1]
             await bot.send_animation(
                 chat_id=channel,
                 animation=URLInputFile(img_url, filename=filename),
                 caption=caption,
-                parse_mode='HTML'
+                parse_mode="HTML",
             )
-        case 'mp4':
+        case "mp4":
             if allow_video:
                 await bot.send_video(
                     chat_id=channel,
                     video=URLInputFile(img_url),
                     caption=caption,
-                    parse_mode='HTML'
+                    parse_mode="HTML",
                 )
             else:
-                logger.warning('Video dont allowed, trying search and post again...')
-                await post_one_image(tags, channel, booru_type, gel_adapter, caption, allow_video)
+                logger.warning("Video dont allowed, trying search and post again...")
+                await post_one_image(
+                    tags, channel, booru_type, gel_adapter, caption, allow_video
+                )
         case _:
-            logger.info(f'Unknown file type: {file_ext}')
-    logger.info(f'Posted image.\n\nTags:\n{tags}\n\nScore:\n{score}')
+            logger.info(f"Unknown file type: {file_ext}")
+    logger.info(f"Posted image.\n\nTags:\n{tags}\n\nScore:\n{score}")
     return None
 
 
-@dp.message(Command('start'))
+@dp.message(Command("start"))
 async def start_handler(message: Message):
-    await message.answer('Hi! I can autopost images from imageboards to your channel. '
-                         'Just write @LapisMYT to setup bot. It\'s free, only condition is to '
-                         'place link to the bot in channel description.')
+    await message.answer(
+        "Hi! I can autopost images from imageboards to your channel. "
+        "Just write @LapisMYT to setup bot. It's free, only condition is to "
+        "place link to the bot in channel description."
+    )
 
 
-@dp.message(Command('help'))
+@dp.message(Command("help"))
 async def help_handler(message: Message):
-    await message.answer('Bot supports different imgboards: /sfb, /r34, /gel, /dan.\n'
-                         'You can use /[imgboard] [search query] to search.\n'
-                         'Use Gelbooru-style tags.')
+    await message.answer(
+        "Bot supports different imgboards: /sfb, /r34, /gel, /dan.\n"
+        "You can use /[imgboard] [search query] to search.\n"
+        "Use Gelbooru-style tags."
+    )
 
 
-@dp.message(Command('gel'))
+@dp.message(Command("gel"))
 async def gel_handler(message: Message):
     if len(message.text) < 7:
-        await message.answer('WRONG USE')
+        await message.answer("WRONG USE")
         return None
-    await post_one_image(message.text.removeprefix('/gel '), message.chat.id, 'gel', caption='')
+    await post_one_image(
+        message.text.removeprefix("/gel "), message.chat.id, "gel", caption=""
+    )
     return None
 
 
-@dp.message(Command('sfb'))
+@dp.message(Command("sfb"))
 async def sfb_handler(message: Message):
     if len(message.text) < 7:
-        await message.answer('WRONG USE')
+        await message.answer("WRONG USE")
         return None
-    await post_one_image(message.text.removeprefix('/sfb '), message.chat.id, 'gel', SafebooruAdapter, caption='')
+    await post_one_image(
+        message.text.removeprefix("/sfb "),
+        message.chat.id,
+        "gel",
+        SafebooruAdapter,
+        caption="",
+    )
     return None
 
 
-@dp.message(Command('dan'))
+@dp.message(Command("dan"))
 async def dan_handler(message: Message):
     if len(message.text) < 7:
-        await message.answer('WRONG USE')
+        await message.answer("WRONG USE")
         return None
     elif len(message.text.split()) > 3:
-        await message.answer('/dan allows no more than 2 tags')
+        await message.answer("/dan allows no more than 2 tags")
         return None
-    await post_one_image(message.text.removeprefix('/dan '), message.chat.id, 'dan', caption='')
+    await post_one_image(
+        message.text.removeprefix("/dan "), message.chat.id, "dan", caption=""
+    )
     return None
 
 
-@dp.message(Command('r34'))
+@dp.message(Command("r34"))
 async def r34_handler(message: Message):
     if len(message.text) < 7:
-        await message.answer('WRONG USE')
+        await message.answer("WRONG USE")
         return None
-    await post_one_image(message.text.removeprefix('/r34 '), message.chat.id, 'gel', Rule34Adapter, caption='')
+    await post_one_image(
+        message.text.removeprefix("/r34 "),
+        message.chat.id,
+        "gel",
+        Rule34Adapter,
+        caption="",
+    )
     return None
 
 
 @dp.message(F.text)
 async def text_handler(message: Message):
     me = await bot.get_me()
-    if message.text.startswith('/'):
+    if message.text.startswith("/"):
         return None
-    if message.chat.type == 'private':
-        await post_one_image(message.text, message.chat.id, 'gel', SafebooruAdapter)
-    elif message.text.startswith(f'@{me.username} '):
-        await post_one_image(message.text.removeprefix(f'@{me.username} '), message.chat.id, 'gel', SafebooruAdapter)
+    if message.chat.type == "private":
+        await post_one_image(message.text, message.chat.id, "gel", SafebooruAdapter)
+    elif message.text.startswith(f"@{me.username} "):
+        await post_one_image(
+            message.text.removeprefix(f"@{me.username} "),
+            message.chat.id,
+            "gel",
+            SafebooruAdapter,
+        )
     return None
 
 
 async def add_autopost_channel(scheduler: AsyncIOScheduler, channel_data: dict):
-    match channel_data['adapter'].lower():
-        case 'gelbooru':
+    match channel_data["adapter"].lower():
+        case "gelbooru":
             adapter = GelbooruAdapter
-            booru_type = 'gel'
-        case 'rule34':
+            booru_type = "gel"
+        case "rule34":
             adapter = Rule34Adapter
-            booru_type = 'gel'
-        case 'danbooru':
+            booru_type = "gel"
+        case "danbooru":
             adapter = DanbooruAdapter
-            booru_type = 'dan'
-        case 'safebooru':
+            booru_type = "dan"
+        case "safebooru":
             adapter = SafebooruAdapter
-            booru_type = 'gel'
+            booru_type = "gel"
         case _:
             adapter = SafebooruAdapter
-            booru_type = 'gel'
+            booru_type = "gel"
     await post_one_image(
-        tags=channel_data['search_tags'],
-        channel=channel_data['chat_id'],
+        tags=channel_data["search_tags"],
+        channel=channel_data["chat_id"],
         booru_type=booru_type,
         gel_adapter=adapter,
-        caption=channel_data['caption'],
-        allow_video=channel_data['allow_video']
+        caption=channel_data["caption"],
+        allow_video=channel_data["allow_video"],
     )
     scheduler.add_job(
         post_one_image,
-        trigger='interval',
-        seconds=channel_data['interval'],
+        trigger="interval",
+        seconds=channel_data["interval"],
         args=(
-            channel_data['search_tags'],
-            channel_data['chat_id'],
+            channel_data["search_tags"],
+            channel_data["chat_id"],
             booru_type,
             adapter,
-            channel_data['caption'],
-            channel_data['allow_video']
-        )
+            channel_data["caption"],
+            channel_data["allow_video"],
+        ),
     )
+
 
 async def main():
     scheduler = AsyncIOScheduler()
     me = await bot.get_me()
-    logger.info(f'Starting @{me.username}')
-    if 'autopost' in config:
+    logger.info(f"Starting @{me.username}")
+    if "autopost" in config:
         tasks = []
-        for autopost_name in config['autopost']:
-            tasks.append(asyncio.create_task(add_autopost_channel(scheduler, config['autopost'][autopost_name])))
+        for autopost_name in config["autopost"]:
+            tasks.append(
+                asyncio.create_task(
+                    add_autopost_channel(scheduler, config["autopost"][autopost_name])
+                )
+            )
         await asyncio.gather(*tasks)
     scheduler.start()
     await dp.start_polling(bot)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

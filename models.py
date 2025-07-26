@@ -42,7 +42,7 @@ class GelbooruPost:
 @dataclass_json
 @dataclass
 class GelbooruSearchResponse:
-    attributes: dict = field(metadata=config(field_name='@attributes'))
+    attributes: dict = field(metadata=config(field_name="@attributes"))
     post: list[GelbooruPost] = field(default_factory=list)
 
 
