@@ -142,7 +142,8 @@ class DanbooruAdapter(BooruAdapter):
 adapters = [
     GelbooruAdapter,
     DanbooruAdapter,
-    SafebooruAdapter
+    SafebooruAdapter,
+    Rule34Adapter
 ]
 
 

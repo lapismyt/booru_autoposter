@@ -61,7 +61,7 @@ async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
 
 async def fetch_one_image_gel(tags: str, use_adapter = GelbooruAdapter) -> tuple[str, str, str] | None:
     logger.info(f'Searching image using {use_adapter}...')
-    adapter = use_adapter(proxy=(PROXY if PROXY else None))
+    adapter = use_adapter(proxy=(PROXY if PROXY else None), api_key=config.get(f'{use_adapter.__name__.upper().removesuffix("ADAPTER")}_API_KEY'))
     try:
         posts = await adapter.search(tags, limit=100)
     except BaseException as err:
