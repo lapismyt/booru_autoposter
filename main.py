@@ -81,14 +81,14 @@ async def fetch_one_image_gel(
     tags: str, use_adapter=GelbooruAdapter
 ) -> tuple[str, str, str] | None:
     logger.info(f"Searching image using {use_adapter}...")
+    api_key_getter = f"{use_adapter.__name__.upper().removesuffix('ADAPTER')}_API_KEY"
+    user_id_getter = f"{use_adapter.__name__.upper().removesuffix('ADAPTER')}_USER_ID"
+    logger.info(f"API key getter: {api_key_getter}")
+    logger.info(f"User ID getter: {user_id_getter}")
     adapter = use_adapter(
         proxy=(PROXY if PROXY else None),
-        api_key=config.get(
-            f"{use_adapter.__name__.upper().removesuffix('ADAPTER')}_API_KEY"
-        ),
-        user_id=config.get(
-            f"{use_adapter.__name__.upper().removesuffix('ADAPTER')}_USER_ID"
-        ),
+        api_key=config.get(api_key_getter),
+        user_id=config.get(user_id_getter),
     )
     try:
         posts = await adapter.search(tags, limit=100)

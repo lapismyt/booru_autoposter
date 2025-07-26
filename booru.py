@@ -100,6 +100,14 @@ class DanbooruAdapter(BooruAdapter):
         self.api_key = api_key
         self.username = username
 
+        auth = None
+        if self.username and self.api_key:
+            auth = aiohttp.BasicAuth(self.username, self.api_key)
+        
+        self.session = aiohttp.ClientSession(
+            base_url=self.api_base, proxy=proxy, auth=auth
+        )
+
     async def search(
         self,
         query: str = "",
@@ -108,6 +116,7 @@ class DanbooruAdapter(BooruAdapter):
         random: bool = False,
         md5: str = None,
     ) -> list[DanbooruPost]:
+        
         params = {"tags": query, "limit": limit, "page": page, "json": 1}
 
         if md5:
