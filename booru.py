@@ -74,7 +74,7 @@ class GelbooruAdapter(BooruAdapter):
                 params=params
             ) as resp:
             # print(await resp.json())
-            conv: list | dict = await resp.json()
+            conv: list | dict = await resp.json(content_type=None)
             if isinstance(conv, list):
                 # print(conv)
                 return [GelbooruPost.from_dict(post) for post in conv]
@@ -131,7 +131,7 @@ class DanbooruAdapter(BooruAdapter):
                 'posts.json',
                 params=params
             ) as resp:
-            conv: list | dict = await resp.json()
+            conv: list | dict = await resp.json(content_type=None)
             if isinstance(conv, list):
                 # print(conv)
                 return [DanbooruPost.from_dict(post) for post in conv]
