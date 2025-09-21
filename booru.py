@@ -4,6 +4,7 @@ from abc import ABC
 import aiohttp
 from rich import print
 from yarl import URL
+from loguru import logger
 
 from models import GelbooruSearchResponse, DanbooruPost, GelbooruPost
 
@@ -66,6 +67,9 @@ class GelbooruAdapter(BooruAdapter):
         ) as resp:
             # print(await resp.json())
             conv: list | dict = await resp.json(content_type=None)
+            if isinstance(conv, str):
+                logger.error(conv)
+                return []
             if isinstance(conv, list):
                 # print(conv)
                 return [GelbooruPost.model_validate(post) for post in conv]

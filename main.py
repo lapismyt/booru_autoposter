@@ -32,7 +32,9 @@ bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
 
 
-async def fetch_one_image_dan(tags: str) -> tuple[str, str, str | None, str, int, str] | None:
+async def fetch_one_image_dan(
+    tags: str,
+) -> tuple[str, str, str | None, str, int, str] | None:
     logger.info("Searching image using DanbooruAdapter...")
 
     adapter = DanbooruAdapter(
@@ -74,7 +76,14 @@ async def fetch_one_image_dan(tags: str) -> tuple[str, str, str | None, str, int
                 result.rating,
             )
     logger.info("Sample not found (somehow), using image from last iteration.")
-    return last[0], last[1], result.source or None, result.tag_string, result.score, result.rating
+    return (
+        last[0],
+        last[1],
+        result.source or None,
+        result.tag_string,
+        result.score,
+        result.rating,
+    )
 
 
 async def fetch_one_image_gel(
@@ -194,7 +203,7 @@ async def post_one_image(
 async def start_handler(message: Message):
     await message.answer(
         "Hi! I can autopost images from imageboards to your channel. "
-        "Just write @LapisMYT to setup bot. It's free, only condition is to "
+        "Just DM @LapisMYT to setup bot. It's free, only condition is to "
         "place link to the bot in channel description."
     )
 
@@ -311,7 +320,7 @@ async def add_autopost_channel(scheduler: AsyncIOScheduler, channel_data: dict):
         tags=channel_data["search_tags"],
         channel=channel_data["chat_id"],
         booru_type=booru_type,
-        gel_adapter=adapter, # pyright: ignore[reportArgumentType]
+        gel_adapter=adapter,  # pyright: ignore[reportArgumentType]
         caption=channel_data["caption"],
         allow_video=channel_data["allow_video"],
     )
