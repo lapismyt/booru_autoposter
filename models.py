@@ -5,7 +5,7 @@ class GelbooruPost(BaseModel):
     id: int
     width: int
     height: int
-    directory: str
+    directory: str | int
     image: str
     rating: str
     source: str
