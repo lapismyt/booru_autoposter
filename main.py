@@ -32,7 +32,7 @@ bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
 
 
-async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
+async def fetch_one_image_dan(tags: str) -> tuple[str, str, str | None, str, int, str] | None:
     logger.info("Searching image using DanbooruAdapter...")
 
     adapter = DanbooruAdapter(
@@ -74,12 +74,12 @@ async def fetch_one_image_dan(tags: str) -> tuple[str, str] | None:
                 result.rating,
             )
     logger.info("Sample not found (somehow), using image from last iteration.")
-    return last, result.source or None, result.tag_string, result.score, result.rating
+    return last[0], last[1], result.source or None, result.tag_string, result.score, result.rating
 
 
 async def fetch_one_image_gel(
     tags: str, use_adapter=GelbooruAdapter
-) -> tuple[str, str, str] | None:
+) -> tuple[str, str, str | None, str, int | None, str] | None:
     logger.info(f"Searching image using {use_adapter}...")
     api_key_getter = f"{use_adapter.__name__.upper().removesuffix('ADAPTER')}_API_KEY"
     user_id_getter = f"{use_adapter.__name__.upper().removesuffix('ADAPTER')}_USER_ID"
@@ -210,6 +210,8 @@ async def help_handler(message: Message):
 
 @dp.message(Command("gel"))
 async def gel_handler(message: Message):
+    if message.text is None:
+        return
     if len(message.text) < 7:
         await message.answer("WRONG USE")
         return None
@@ -221,6 +223,8 @@ async def gel_handler(message: Message):
 
 @dp.message(Command("sfb"))
 async def sfb_handler(message: Message):
+    if message.text is None:
+        return
     if len(message.text) < 7:
         await message.answer("WRONG USE")
         return None
@@ -236,6 +240,8 @@ async def sfb_handler(message: Message):
 
 @dp.message(Command("dan"))
 async def dan_handler(message: Message):
+    if message.text is None:
+        return
     if len(message.text) < 7:
         await message.answer("WRONG USE")
         return None
@@ -250,6 +256,8 @@ async def dan_handler(message: Message):
 
 @dp.message(Command("r34"))
 async def r34_handler(message: Message):
+    if message.text is None:
+        return
     if len(message.text) < 7:
         await message.answer("WRONG USE")
         return None
@@ -265,6 +273,8 @@ async def r34_handler(message: Message):
 
 @dp.message(F.text)
 async def text_handler(message: Message):
+    if message.text is None:
+        return
     me = await bot.get_me()
     if message.text.startswith("/"):
         return None
@@ -301,7 +311,7 @@ async def add_autopost_channel(scheduler: AsyncIOScheduler, channel_data: dict):
         tags=channel_data["search_tags"],
         channel=channel_data["chat_id"],
         booru_type=booru_type,
-        gel_adapter=adapter,
+        gel_adapter=adapter, # pyright: ignore[reportArgumentType]
         caption=channel_data["caption"],
         allow_video=channel_data["allow_video"],
     )

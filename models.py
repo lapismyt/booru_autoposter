@@ -1,11 +1,7 @@
-from dataclasses import dataclass, field
-
-from dataclasses_json import dataclass_json, config, DataClassJsonMixin
+from pydantic import BaseModel, Field
 
 
-@dataclass_json
-@dataclass
-class GelbooruPost:
+class GelbooruPost(BaseModel):
     id: int
     width: int
     height: int
@@ -39,16 +35,12 @@ class GelbooruPost:
     created_at: str | None = None
 
 
-@dataclass_json
-@dataclass
-class GelbooruSearchResponse:
-    attributes: dict = field(metadata=config(field_name="@attributes"))
-    post: list[GelbooruPost] = field(default_factory=list)
+class GelbooruSearchResponse(BaseModel):
+    attributes: dict = Field(default_factory=dict, alias="@attributes")
+    post: list[GelbooruPost] = Field(default_factory=list)
 
 
-@dataclass_json
-@dataclass
-class DanbooruMediaVariant:
+class DanbooruMediaVariant(BaseModel):
     type: str
     url: str
     width: int
@@ -56,9 +48,7 @@ class DanbooruMediaVariant:
     file_ext: str
 
 
-@dataclass_json
-@dataclass
-class DanbooruMediaAsset:
+class DanbooruMediaAsset(BaseModel):
     id: int
     created_at: str
     updated_at: str
@@ -75,9 +65,7 @@ class DanbooruMediaAsset:
     md5: str | None = None
 
 
-@dataclass_json
-@dataclass
-class DanbooruPost(DataClassJsonMixin):
+class DanbooruPost(BaseModel):
     id: int
     created_at: str
     uploader_id: int

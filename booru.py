@@ -9,7 +9,7 @@ from models import GelbooruSearchResponse, DanbooruPost, GelbooruPost
 
 
 class BooruAdapter(ABC):
-    api_base: str = ...
+    api_base: str
     session: aiohttp.ClientSession
 
     def __init__(
@@ -68,8 +68,8 @@ class GelbooruAdapter(BooruAdapter):
             conv: list | dict = await resp.json(content_type=None)
             if isinstance(conv, list):
                 # print(conv)
-                return [GelbooruPost.from_dict(post) for post in conv]
-            return GelbooruSearchResponse.from_dict(await resp.json()).post
+                return [GelbooruPost.model_validate(post) for post in conv]
+            return GelbooruSearchResponse.model_validate(await resp.json()).post
 
 
 class SafebooruAdapter(GelbooruAdapter):
@@ -103,7 +103,7 @@ class DanbooruAdapter(BooruAdapter):
         auth = None
         if self.username and self.api_key:
             auth = aiohttp.BasicAuth(self.username, self.api_key)
-        
+
         self.session = aiohttp.ClientSession(
             base_url=self.api_base, proxy=proxy, auth=auth
         )
@@ -114,9 +114,8 @@ class DanbooruAdapter(BooruAdapter):
         limit: int = 100,
         page: int = 0,
         random: bool = False,
-        md5: str = None,
+        md5: str | None = None,
     ) -> list[DanbooruPost]:
-        
         params = {"tags": query, "limit": limit, "page": page, "json": 1}
 
         if md5:
@@ -126,7 +125,7 @@ class DanbooruAdapter(BooruAdapter):
             conv: list | dict = await resp.json(content_type=None)
             if isinstance(conv, list):
                 # print(conv)
-                return [DanbooruPost.from_dict(post) for post in conv]
+                return [DanbooruPost.model_validate(post) for post in conv]
             raise DanbooruError(conv["message"])
 
 
